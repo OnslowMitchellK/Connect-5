@@ -3,7 +3,16 @@
 # were used in the development of this code
 
 import numpy as np
+import pygame
+import sys
+import math
 from typing import List
+
+# Colour variables
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+BG_COLOUR = (0, 0, 0)
 
 ROW_COUNT = 7
 COLUMN_COUNT = 8
@@ -17,7 +26,7 @@ def create_board() -> None:
         numpy.ndarray: A 7x8 display representing the connect 5
                        game board will each spot filled in with a zero.
     """
-    board = np.zeros((7, 8))
+    board = np.zeros((ROW_COUNT, COLUMN_COUNT))
     return board
 
 
@@ -79,11 +88,28 @@ def print_board(board: List[List[int]]) -> None:
     print(np.flip(board, 0))
 
 
+def win_check (board, piece):
+    """Checks for winning move in all possible ways"""
+
+
 board = create_board()
 print_board(board)
 game_over = False
 turn = 0
 
+# Initialize pygame
+pygame.init()
+
+# Define screen size
+SQUARESIZE = 100
+
+# Width and heigh of the board
+width = COLUMN_COUNT * SQUARESIZE
+height = (ROW_COUNT + 1) * SQUARESIZE
+
+size = (width, height)
+
+RADIUS = int(SQUARESIZE/2 - 5)
 
 while not game_over:
     # Ask for player 1 input
