@@ -90,6 +90,16 @@ def print_board(board: List[List[int]]) -> None:
 
 def win_check (board, piece):
     """Checks for winning move in all possible ways"""
+    # Check for 5 verticle in a row
+    for col in range(COLUMN_COUNT):
+        for row in range(ROW_COUNT-3):
+            if (
+                board[row][col] == piece and
+                board[row + 1][col] == piece and
+                board[row + 2][col] == piece and
+                board[row + 3][col] == piece
+               ):
+                return True
 
 
 board = create_board()
@@ -110,6 +120,9 @@ height = (ROW_COUNT + 1) * SQUARESIZE
 size = (width, height)
 
 RADIUS = int(SQUARESIZE/2 - 5)
+
+screen = pygame.display.set_mode(size)
+
 
 while not game_over:
     # Ask for player 1 input
