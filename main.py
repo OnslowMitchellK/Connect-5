@@ -1,6 +1,6 @@
 """Connect 5 Game."""
 # Videos from https://www.youtube.com/@freecodecamp/videos
-# were used in the development of this code
+# were used to aid the development of this code
 
 import numpy as np
 import pygame
@@ -89,7 +89,7 @@ def print_board(board: List[List[int]]) -> None:
 
 
 def win_check (board, piece):
-    """Checks for winning move in all possible ways"""
+    """Check for winning move in all possible ways."""
     # Check for 5 verticle in a row
     for col in range(COLUMN_COUNT):
         for row in range(ROW_COUNT-3):
@@ -100,6 +100,39 @@ def win_check (board, piece):
                 board[row + 3][col] == piece
                ):
                 return True
+
+
+def draw_board(board):
+    for col in range(COLUMN_COUNT):
+        for row in range(ROW_COUNT):
+            pygame.draw.rect(screen, BLUE, (col * SQUARESIZE,
+                                            row * SQUARESIZE + SQUARESIZE,
+                                            SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(screen, BG_COLOUR, (int(col * SQUARESIZE +
+                                                       SQUARESIZE / 2),
+                                                   int(row * SQUARESIZE +
+                                                       SQUARESIZE +
+                                                       SQUARESIZE /
+                                                       2)), RADIUS)
+
+    for c in range(COLUMN_COUNT):
+        for row in range(ROW_COUNT):
+            if board[row][col] == 1:
+                pygame.draw.circle(screen, RED, (int(col *
+                                                     SQUARESIZE + SQUARESIZE /
+                                                     2), height -
+                                                 int(row * SQUARESIZE +
+                                                     SQUARESIZE /
+                                                     2)), RADIUS)
+            elif board[row][col] == 2:
+                pygame.draw.circle(screen, YELLOW, (int(c *
+                                                        SQUARESIZE +
+                                                        SQUARESIZE /
+                                                        2), height -
+                                                    int(row * SQUARESIZE +
+                                                        SQUARESIZE /
+                                                        2)), RADIUS)
+    pygame.display.update()
 
 
 board = create_board()
@@ -123,24 +156,38 @@ RADIUS = int(SQUARESIZE/2 - 5)
 
 screen = pygame.display.set_mode(size)
 
+draw_board(board)
+pygame.display.update()
 
 while not game_over:
-    # Ask for player 1 input
-    if turn == 0:
-        col = int(input("Player 1, Make your Selection(0-7):"))
-        # Player 1 will drop a piece on the board
-        if is_valid_location(board, col):
-            row = get_next_open_row(board, col)
-            drop_piece(board, row, col, "1")
-    # Ask for player 2 input
-    else:
-        col = int(input("Player 2, Make your Selection(0-7):"))
-        # Player 2 will drop a piece on the board
-        if is_valid_location(board, col):
-            row = get_next_open_row(board, col)
-            drop_piece(board, row, col, "2")
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+
+        if event.type == pygame.MOUSEMOTION:
+            pygame.draw.rect(screen, BG_COLOUR, (0, 0, width, SQUARESIZE))
+            posx = event.pos[0]
+            if turn == 0:
+                pygame.draw.circle(screen, RED,
+                                   (posx, int(SQUARESIZE/2)), RADIUS)
+            else:
+                pygame.draw.circle(screen, YELLOW,
+                                   (posx, int(SQUARESIZE/2)), RADIUS)
+        pygame.display.update()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.draw.rect(screen, BG_COLOUR, (0, 0, width, SQUARESIZE))
+            # PLayer one turn
+            if turn == 0:
+                posx = event.pos[0]
+                col = int(math.floor(posx/SQUARESIZE))
+
+                if is_valid_location(board, col):
+                    row = get_next_open_row(board, col)
+                    drop_piece(board, row, col, 1)
 
     print_board(board)
+    draw_board(board)
 
     turn += 1
     turn = turn % 2
