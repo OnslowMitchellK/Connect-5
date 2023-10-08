@@ -115,17 +115,18 @@ def draw_board(board):
                                                        SQUARESIZE /
                                                        2)), RADIUS)
 
-    for c in range(COLUMN_COUNT):
+    for col in range(COLUMN_COUNT):
         for row in range(ROW_COUNT):
             if board[row][col] == 1:
                 pygame.draw.circle(screen, RED, (int(col *
-                                                     SQUARESIZE + SQUARESIZE /
+                                                     SQUARESIZE +
+                                                     SQUARESIZE /
                                                      2), height -
                                                  int(row * SQUARESIZE +
                                                      SQUARESIZE /
                                                      2)), RADIUS)
             elif board[row][col] == 2:
-                pygame.draw.circle(screen, YELLOW, (int(c *
+                pygame.draw.circle(screen, YELLOW, (int(col *
                                                         SQUARESIZE +
                                                         SQUARESIZE /
                                                         2), height -
@@ -159,6 +160,8 @@ screen = pygame.display.set_mode(size)
 draw_board(board)
 pygame.display.update()
 
+myfont = pygame.font.SysFont("monospace", 75)
+
 while not game_over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -186,8 +189,30 @@ while not game_over:
                     row = get_next_open_row(board, col)
                     drop_piece(board, row, col, 1)
 
-    print_board(board)
-    draw_board(board)
+                    if win_check(board, 1):
+                        label = myfont.render("Player 1 wins!!", 1, RED)
+                        screen.blit(label, (40, 10))
+                        game_over = True
 
-    turn += 1
-    turn = turn % 2
+            # PLayer two turn
+            else:
+                posx = event.pos[0]
+                col = int(math.floor(posx/SQUARESIZE))
+
+                if is_valid_location(board, col):
+                    row = get_next_open_row(board, col)
+                    drop_piece(board, row, col, 2)
+
+                    if win_check(board, 2):
+                        label = myfont.render("Player 1 wins!!", 1, YELLOW)
+                        screen.blit(label, (40, 10))
+                        game_over = True
+
+            print_board(board)
+            draw_board(board)
+
+            turn += 1
+            turn = turn % 2
+
+            if game_over:
+                pygame.time.wait(3000)
