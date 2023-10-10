@@ -92,12 +92,13 @@ def win_check (board, piece):
     """Check for winning move in all possible ways."""
     # Check for 5 verticle in a row
     for col in range(COLUMN_COUNT):
-        for row in range(ROW_COUNT-3):
+        for row in range(ROW_COUNT-4):
             if (
                 board[row][col] == piece and
                 board[row + 1][col] == piece and
                 board[row + 2][col] == piece and
-                board[row + 3][col] == piece
+                board[row + 3][col] == piece and
+                board[row + 4][col] == piece
                ):
                 return True
 
