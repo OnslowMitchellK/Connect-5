@@ -187,6 +187,8 @@ while not game_over:
                 col = int(math.floor(posx/SQUARESIZE))
 
                 if is_valid_location(board, col):
+                    turn += 1
+                    turn = turn % 2
                     row = get_next_open_row(board, col)
                     drop_piece(board, row, col, 1)
 
@@ -199,21 +201,23 @@ while not game_over:
             else:
                 posx = event.pos[0]
                 col = int(math.floor(posx/SQUARESIZE))
+                print(board[0][col])
+                if board[0][col] != 0:
+                    if is_valid_location(board, col):
+                        turn += 1
+                        turn = turn % 2
+                        row = get_next_open_row(board, col)
+                        drop_piece(board, row, col, 2)
 
-                if is_valid_location(board, col):
-                    row = get_next_open_row(board, col)
-                    drop_piece(board, row, col, 2)
-
-                    if win_check(board, 2):
-                        label = myfont.render("Player 1 wins!!", 1, YELLOW)
-                        screen.blit(label, (40, 10))
-                        game_over = True
+                        if win_check(board, 2):
+                            label = myfont.render("Player 1 wins!!", 1, YELLOW)
+                            screen.blit(label, (40, 10))
+                            game_over = True
 
             print_board(board)
             draw_board(board)
 
-            turn += 1
-            turn = turn % 2
+            
 
             if game_over:
                 pygame.time.wait(3000)
