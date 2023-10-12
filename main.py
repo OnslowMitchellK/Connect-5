@@ -62,7 +62,7 @@ def is_valid_location(board: List[List[str]], col: int) -> bool:
         bool: True if the column is vacant
               (all rows are empty strings), False otherwise.
     """
-    return board[5][col] != ""
+    return board[6][col] == 0
 
 
 def get_next_open_row(board: List[List[str]], col: int) -> int:
@@ -99,7 +99,19 @@ def win_check (board, piece):
                 board[row + 2][col] == piece and
                 board[row + 3][col] == piece and
                 board[row + 4][col] == piece
-               ):
+                ):
+                return True
+
+	# Check for 5 horizontal in a row
+    for col in range(COLUMN_COUNT-4):
+        for row in range(ROW_COUNT):
+            if (
+                board[row][col] == piece and
+                board[row][col + 1] == piece and
+                board[row][col + 2] == piece and
+                board[row][col + 3] == piece and
+                board[row][col + 4] == piece
+                ):
                 return True
 
 
@@ -201,18 +213,16 @@ while not game_over:
             else:
                 posx = event.pos[0]
                 col = int(math.floor(posx/SQUARESIZE))
-                print(board[0][col])
-                if board[0][col] != 0:
-                    if is_valid_location(board, col):
-                        turn += 1
-                        turn = turn % 2
-                        row = get_next_open_row(board, col)
-                        drop_piece(board, row, col, 2)
+                if is_valid_location(board, col):
+                    turn += 1
+                    turn = turn % 2
+                    row = get_next_open_row(board, col)
+                    drop_piece(board, row, col, 2)
 
-                        if win_check(board, 2):
-                            label = myfont.render("Player 1 wins!!", 1, YELLOW)
-                            screen.blit(label, (40, 10))
-                            game_over = True
+                    if win_check(board, 2):
+                        label = myfont.render("Player 1 wins!!", 1, YELLOW)
+                        screen.blit(label, (40, 10))
+                        game_over = True
 
             print_board(board)
             draw_board(board)
