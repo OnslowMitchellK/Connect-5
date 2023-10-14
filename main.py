@@ -91,51 +91,28 @@ def print_board(board: List[List[int]]) -> None:
 def win_check (board, piece):
     """Check for winning move in all possible ways."""
     # Check for 5 verticle in a row
-    for col in range(COLUMN_COUNT):
-        for row in range(ROW_COUNT-4):
-            if (
-                board[row][col] == piece and
-                board[row + 1][col] == piece and
-                board[row + 2][col] == piece and
-                board[row + 3][col] == piece and
-                board[row + 4][col] == piece
-                ):
+    # https://www.geeksforgeeks.org/python-all-function/
+    for row in range(ROW_COUNT - 4):
+        for col in range(COLUMN_COUNT):
+            if all(board[row + i][col] == piece for i in range(5)):
                 return True
 
     # Check for 5 horizontal in a row
-    for col in range(COLUMN_COUNT-4):
-        for row in range(ROW_COUNT):
-            if (
-                board[row][col] == piece and
-                board[row][col + 1] == piece and
-                board[row][col + 2] == piece and
-                board[row][col + 3] == piece and
-                board[row][col + 4] == piece
-                ):
+    for row in range(ROW_COUNT):
+        for col in range(COLUMN_COUNT - 4):
+            if all(board[row][col + i] == piece for i in range(5)):
                 return True
 
     # Check for 5 negatively sloped diaganol in a row
-    for col in range(COLUMN_COUNT-4):
-        for row in range(4, ROW_COUNT):
-            if (
-                board[row][col] == piece and
-                board[row - 1][col + 1] == piece and
-                board[row - 2][col + 2 ] == piece and
-                board[row - 3][col + 3] == piece and
-                board[row - 4][col + 4] == piece
-                ):
+    for row in range(4, ROW_COUNT):
+        for col in range(COLUMN_COUNT - 4):
+            if all(board[row - i][col + i] == piece for i in range(5)):
                 return True
-            
+
     # Check for 5 positivly sloped diaganol in  a row
-    for col in range(COLUMN_COUNT- 4):
-        for row in range(ROW_COUNT - 4):
-            if (
-                board[row][col] == piece and
-                board[row + 1][col + 1] == piece and
-                board[row + 2][col + 2] == piece and
-                board[row + 3][col + 3] == piece and
-                board[row + 4][col + 4] == piece
-                ):
+    for row in range(ROW_COUNT - 4):
+        for col in range(COLUMN_COUNT - 4):
+            if all(board[row + i][col + i] == piece for i in range(5)):
                 return True
 
 
@@ -250,8 +227,6 @@ while not game_over:
 
             print_board(board)
             draw_board(board)
-
-            
 
             if game_over:
                 pygame.time.wait(3000)
