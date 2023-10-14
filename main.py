@@ -114,6 +114,18 @@ def win_check (board, piece):
                 ):
                 return True
 
+    # Check for 5 negatively sloped diaganol
+    for col in range(COLUMN_COUNT-4):
+        for row in range(4, ROW_COUNT):
+            if (
+                board[row][col] == piece and
+                board[row-1][col+1] == piece and
+                board[row-2][col+2] == piece and
+                board[row-3][col+3] == piece and
+                board[row-4][col+4] == piece
+                ):
+                return True
+
 
 def draw_board(board):
     for col in range(COLUMN_COUNT):
