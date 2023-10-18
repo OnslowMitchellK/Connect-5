@@ -51,7 +51,7 @@ def drop_piece(board: List[List[int]], row: int,
 
 def is_valid_location(board: List[List[int]], col: int) -> bool:
     """
-    Check if a given column is a valid location for placing a disc.
+    Check if a given column is a valid location for placing a checker.
 
     Args:
         board (List[List[str]]): The game board represented
@@ -115,6 +115,18 @@ def win_check(board: List[List[int]], piece: int) -> bool:
     for row in range(ROW_COUNT):
         for col in range(COLUMN_COUNT - 4):
             if all(board[row][col + i] == piece for i in range(5)):
+                return True
+            
+    # Check for 5 negatively sloped diaganol
+    for col in range(COLUMN_COUNT-4):
+        for row in range(4, ROW_COUNT):
+            if (
+                board[row][col] == piece and
+                board[row-1][col+1] == piece and
+                board[row-2][col+2] == piece and
+                board[row-3][col+3] == piece and
+                board[row-4][col+4] == piece
+                ):
                 return True
 
     # Check for 5 negatively sloped diaganol in a row
@@ -202,6 +214,9 @@ pygame.display.update()
 
 myfont = pygame.font.SysFont("monospace", 75)
 
+clock = pygame.time.Clock()
+current_time = 0
+
 while not game_over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -256,3 +271,8 @@ while not game_over:
 
             if game_over:
                 pygame.time.wait(5000)
+    
+    current_time = pygame.time.get_ticks()
+    print(current_time)
+
+    clock.tick(60)
