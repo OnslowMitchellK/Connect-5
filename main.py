@@ -216,6 +216,8 @@ myfont = pygame.font.SysFont("monospace", 75)
 
 clock = pygame.time.Clock()
 current_time = 0
+player_one_button_press_time = 0
+player_two_button_press_time = 0
 
 while not game_over:
     for event in pygame.event.get():
@@ -241,6 +243,7 @@ while not game_over:
                 col = int(math.floor(posx/SQUARESIZE))
 
                 if is_valid_location(board, col):
+                    player_one_button_press_time = pygame.time.get_ticks()
                     turn += 1
                     turn = turn % 2
                     row = get_next_open_row(board, col)
@@ -256,6 +259,7 @@ while not game_over:
                 posx = event.pos[0]
                 col = int(math.floor(posx/SQUARESIZE))
                 if is_valid_location(board, col):
+                    player_two_button_press_time = pygame.time.get_ticks()
                     turn += 1
                     turn = turn % 2
                     row = get_next_open_row(board, col)
@@ -273,6 +277,13 @@ while not game_over:
                 pygame.time.wait(5000)
     
     current_time = pygame.time.get_ticks()
-    print(current_time)
+    if current_time - player_one_button_press_time > 2000:
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        turn = 0
+    
+    elif current_time - player_two_button_press_time > 2000:
+        print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+        turn = 1
+    print(f"current_time: {current_time} button press time: {player_two_button_press_time}")
 
     clock.tick(60)
