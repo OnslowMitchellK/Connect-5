@@ -18,20 +18,20 @@ ROW_COUNT = 7
 COLUMN_COUNT = 8
 
 
-def create_board() -> None:
+def create_board() -> List[List[int]]:
     """
     Create a 7x8 game board filled with zeros.
 
     Returns:
-        numpy.ndarray: A 7x8 display representing the connect 5
-                       game board will each spot filled in with a zero.
+        List[List[int]]: A 7x8 display representing the connect 5
+                        game board with each spot filled in with 0.
     """
-    board = np.zeros((ROW_COUNT, COLUMN_COUNT))
+    board = [[0] * COLUMN_COUNT for _ in range(ROW_COUNT)]
     return board
 
 
-def drop_piece(board: List[List[str]], row: int, col: int,
-               piece: str) -> List[List[str]]:
+def drop_piece(board: List[List[int]], row: int,
+               col: int, piece: int) -> List[List[int]]:
     """
     Place a game piece on the game board.
 
@@ -49,7 +49,7 @@ def drop_piece(board: List[List[str]], row: int, col: int,
     return board
 
 
-def is_valid_location(board: List[List[str]], col: int) -> bool:
+def is_valid_location(board: List[List[int]], col: int) -> bool:
     """
     Check if a given column is a valid location for placing a disc.
 
@@ -65,7 +65,7 @@ def is_valid_location(board: List[List[str]], col: int) -> bool:
     return board[6][col] == 0
 
 
-def get_next_open_row(board: List[List[str]], col: int) -> int:
+def get_next_open_row(board: List[List[int]], col: int) -> int:
     """
     Find the next open row in a given column.
 
@@ -88,8 +88,22 @@ def print_board(board: List[List[int]]) -> None:
     print(np.flip(board, 0))
 
 
-def win_check (board, piece):
-    """Check for winning move in all possible ways."""
+def win_check(board: List[List[int]], piece: int) -> bool:
+    """
+    Check for a winning move in all possible ways on the Connect 5 game board.
+
+    Args:
+        board (List[List[int]]): A 2D list representing the game board
+            with integer values where 0 represents an empty spot, 1 represents
+            player one's checker, and 2 represents player two's checker.
+        piece (int): The player's checker to check for a winning
+            combination (1 or 2).
+
+    Returns:
+        bool: True if a winning combination of five checkers of the
+            specified 'checker' is found in any direction (vertical,
+            horizontal, or diagonal); otherwise, False.
+    """
     # Check for 5 verticle in a row
     # https://www.geeksforgeeks.org/python-all-function/
     for row in range(ROW_COUNT - 4):
@@ -114,9 +128,21 @@ def win_check (board, piece):
         for col in range(COLUMN_COUNT - 4):
             if all(board[row + i][col + i] == piece for i in range(5)):
                 return True
+            
+    # If no win is detected, return False
+    return False
 
 
-def draw_board(board):
+def draw_board(board: List[List[int]]) -> None:
+    """
+    Draw the Connect 5 game board on the screen with the current game state.
+
+    Args:
+        board (List[List[int]]): A 2D list representing the game board
+            with integer values where 0 represents an empty spot, 1 represents
+            player one's piece (red checker), and 2 represents player
+            two's piece (yellow checker).
+    """
     for col in range(COLUMN_COUNT):
         for row in range(ROW_COUNT):
             pygame.draw.rect(screen, BLUE, (col * SQUARESIZE,
@@ -229,4 +255,4 @@ while not game_over:
             draw_board(board)
 
             if game_over:
-                pygame.time.wait(3000)
+                pygame.time.wait(5000)
