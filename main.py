@@ -2,6 +2,7 @@
 # Videos from https://www.youtube.com/@freecodecamp/videos
 # were used to aid the development of this code
 
+# Importing
 import numpy as np
 import pygame
 import sys
@@ -14,6 +15,7 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BG_COLOUR = (0, 0, 0)
 
+# Row and Column variables
 ROW_COUNT = 7
 COLUMN_COUNT = 8
 
@@ -115,18 +117,6 @@ def win_check(board: List[List[int]], piece: int) -> bool:
     for row in range(ROW_COUNT):
         for col in range(COLUMN_COUNT - 4):
             if all(board[row][col + i] == piece for i in range(5)):
-                return True
-            
-    # Check for 5 negatively sloped diaganol
-    for col in range(COLUMN_COUNT-4):
-        for row in range(4, ROW_COUNT):
-            if (
-                board[row][col] == piece and
-                board[row-1][col+1] == piece and
-                board[row-2][col+2] == piece and
-                board[row-3][col+3] == piece and
-                board[row-4][col+4] == piece
-                ):
                 return True
 
     # Check for 5 negatively sloped diaganol in a row
@@ -280,6 +270,7 @@ while not game_over:
     
     current_time = pygame.time.get_ticks()
     if first_move:
+        # https://www.geeksforgeeks.org/python-match-case-statement/
         match turn:
             case 0:
                 player_one_button_press_time = pygame.time.get_ticks()
@@ -288,17 +279,16 @@ while not game_over:
     else:
         player_one_button_press_time = pygame.time.get_ticks()
         player_two_button_press_time = pygame.time.get_ticks()
-    if current_time - player_one_button_press_time > 2000:
+    if current_time - player_one_button_press_time > 30000:
         print("1")
         turn = 0
         player_two_button_press_time = pygame.time.get_ticks()
         player_one_button_press_time = 0
     
-    if current_time - player_two_button_press_time > 2000:
+    if current_time - player_two_button_press_time > 30000:
         print("2")
         turn = 1
         player_one_button_press_time = pygame.time.get_ticks()
         player_two_button_press_time = 0
-    print(f"current_time: {current_time}\n P1:  {player_one_button_press_time}\n P2: {player_two_button_press_time}\n p1 diff {current_time - player_one_button_press_time}\n p2 diff: {current_time - player_two_button_press_time}")
 
     clock.tick(60)
