@@ -338,13 +338,13 @@ class Connect5Game:
             else:
                 player_one_button_press_time = pygame.time.get_ticks()
                 player_two_button_press_time = pygame.time.get_ticks()
-            if current_time - player_one_button_press_time > 30000:
+            if current_time - player_one_button_press_time > 20000:
                 print("1")
                 self.turn = 0
                 player_two_button_press_time = pygame.time.get_ticks()
                 player_one_button_press_time = 0
 
-            if current_time - player_two_button_press_time > 30000:
+            if current_time - player_two_button_press_time > 20000:
                 print("2")
                 self.turn = 1
                 player_one_button_press_time = pygame.time.get_ticks()
