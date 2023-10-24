@@ -17,7 +17,7 @@ class Connect5Game:
         BLUE (tuple): RGB color code for blue.
         RED (tuple): RGB color code for red.
         YELLOW (tuple): RGB color code for yellow.
-        BG_COLOUR (tuple): RGB color code for the background.
+        BG_COLOUR (tuple): RGB color code for the background (black).
         ROW_COUNT (int): Number of rows on the game board.
         COLUMN_COUNT (int): Number of columns on the game board.
         board (List[List[int]]): 2D list representing the game board.
@@ -126,6 +126,7 @@ class Connect5Game:
             int: The index of the next open row, or -1 if the column is full.
         """
         for row in range(self.ROW_COUNT):
+            # Checks if the row for the column is full
             if self.board[row][col] == 0:
                 return row
         return -1  # -1 if column is full
@@ -159,24 +160,32 @@ class Connect5Game:
         Returns:
             bool: True if a winning combination is found, False otherwise.
         """
+        # Check for 5 verticle checkers in a row
         for row in range(self.ROW_COUNT - 4):
             for col in range(self.COLUMN_COUNT):
+                # If 5 checkers in a row win_check will become True
                 if all(self.board[row + i][col] == piece for i in range(5)):
                     return True
 
+        # Check for 5 horizontal checkers in a row
         for row in range(self.ROW_COUNT):
             for col in range(self.COLUMN_COUNT - 4):
+                # If 5 checkers in a row win_check will become True
                 if all(self.board[row][col + i] == piece for i in range(5)):
                     return True
 
+        # Checks for 5 negativly sloped diagonal checkers in a row
         for row in range(4, self.ROW_COUNT):
             for col in range(self.COLUMN_COUNT - 4):
+                # If 5 checkers in a row win_check will become True
                 if all(self.board[row - i][col + i]
                        == piece for i in range(5)):
                     return True
 
+        # Checks for 5 positively sloped diagonal checkers in a row
         for row in range(self.ROW_COUNT - 4):
             for col in range(self.COLUMN_COUNT - 4):
+                # If 5 checkers in a row win_check will become True
                 if all(self.board[row + i][col + i]
                        == piece for i in range(5)):
                     return True
@@ -189,18 +198,18 @@ class Connect5Game:
 
         This method visually represents the current
         state of the game board on the game screen.
-        It draws the game grid and any player pieces that are on the board.
+        It draws the game grid and any player checkers that are on the board.
 
         Returns:
         None
         """
+        # This part of code draws the blue grid that the checkers fall into
         for col in range(self.COLUMN_COUNT):
             for row in range(self.ROW_COUNT):
                 pygame.draw.rect(self.screen, self.BLUE,
                                  (col * self.SQUARESIZE, row *
                                   self.SQUARESIZE + self.SQUARESIZE,
                                   self.SQUARESIZE, self.SQUARESIZE))
-
                 pygame.draw.circle(
                     self.screen, self.BG_COLOUR,
                     (int(col * self.SQUARESIZE + self.SQUARESIZE / 2),
@@ -209,6 +218,7 @@ class Connect5Game:
                     self.RADIUS
                 )
 
+        # This part of code draws the red or yellow checkers that the player places
         for col in range(self.COLUMN_COUNT):
             for row in range(self.ROW_COUNT):
                 if self.board[row][col] == 1:
@@ -266,6 +276,7 @@ class Connect5Game:
         player_one_button_press_time = 0
         player_two_button_press_time = 0
         first_move = False
+        # Check if game is still running or not
         while not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -325,10 +336,13 @@ class Connect5Game:
                     self.print_board()
                     self.draw_board()
 
+                    # Auto closes game after 5 seconds after a win
                     if self.game_over:
                         pygame.time.wait(5000)
 
+            # Code for hidden turn timer
             current_time = pygame.time.get_ticks()
+            # Checks if it is first move to start timer
             if first_move:
                 match self.turn:
                     case 0:
@@ -338,12 +352,13 @@ class Connect5Game:
             else:
                 player_one_button_press_time = pygame.time.get_ticks()
                 player_two_button_press_time = pygame.time.get_ticks()
+            # Checks if player 1's timer reaches 20 seconds
             if current_time - player_one_button_press_time > 20000:
                 print("1")
                 self.turn = 0
                 player_two_button_press_time = pygame.time.get_ticks()
                 player_one_button_press_time = 0
-
+            # Checks if player 2's timer reaches 20 seconds
             if current_time - player_two_button_press_time > 20000:
                 print("2")
                 self.turn = 1
