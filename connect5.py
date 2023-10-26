@@ -1,373 +1,253 @@
-"""Connect 5 Game."""
-# Videos from https://www.youtube.com/@freecodecamp/videos
-# were used to aid the development of this section of code
+"""Main menu for Connect 5."""
 
-import numpy as np
 import pygame
 import sys
-import math
-from typing import List
+import connect5
+from typing import Optional, Callable
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+ORIGINAL_WIDTH, ORIGINAL_HEIGHT = 800, 600
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+LMB = 1  # left mouse button
+WINDOW_TITLE = "Connect 5"
+TITLE_FONT_SIZE = 72
+
+BUTTON_COLOR = (0, 128, 255)
+BUTTON_HOVER_COLOR = (0, 0, 255)
+BUTTON_FONT_SIZE = 36
+GIMMICKS_FONT_SIZE = 24
+
+GIMMICKS_WIDTH = 600
+GIMMICKS_HEIGHT = 400
+BUTTON_WIDTH = 200
+BUTTON_HEIGHT = 50
+
+PLAY_BUTTON_X = 300
+PLAY_BUTTON_Y = 250
+GIMMICKS_BUTTON_X = 300
+GIMMICKS_BUTTON_Y = 320
+GIMMICKS_WINDOW_X = 50
+GIMMICKS_WINDOW_Y_ADJUST = 30
+EXIT_BUTTON_X = 300
+EXIT_BUTTON_Y = 390
 
 
-class Connect5Game:
+# Create a Button class
+class Button:
     """
-    A class representing a Connect 5 game.
+    A class to represent a clickable button in the game.
 
     Attributes:
-        BLUE (tuple): RGB color code for blue.
-        RED (tuple): RGB color code for red.
-        YELLOW (tuple): RGB color code for yellow.
-        BG_COLOUR (tuple): RGB color code for the background (black).
-        ROW_COUNT (int): Number of rows on the game board.
-        COLUMN_COUNT (int): Number of columns on the game board.
-        board (List[List[int]]): 2D list representing the game board.
-        turn (int): Current player's turn (0 for player 1, 1 for player 2).
-        game_over (bool): Indicates if the game is over.
-
-    Methods:
-        create_board() -> List[List[int]]:
-            Create an empty game board.
-
-        drop_piece(row: int, col: int, piece: int):
-            Place a game piece on the game board.
-
-        is_valid_location(col: int) -> bool:
-            Check if a given column is a valid location for placing a checker.
-
-        get_next_open_row(col: int) -> int:
-            Find the next open row in a given column.
-
-        print_board():
-            Print the game board.
-
-        win_check(piece: int) -> bool:
-            Check for a winning move on the game board.
-
-    Usage:
-    - Create an instance of Connect5Game to start a new game.
-    - Use the provided methods to play and manage the game.
+    - x (int): The x-coordinate of the button.
+    - y (int): The y-coordinate of the button.
+    - width (int): The width of the button.
+    - height (int): The height of the button.
+    - text (str): The text displayed on the button.
+    - action (function): The function to execute when the button is clicked.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, x: int, y: int, width: int, height: int,
+                 text: str, action: Optional[Callable[[], None]] = None):
         """
-        Initialize a Connect5Game instance.
+        Initialize a Button instance.
 
-        This constructor initializes a new Connect5Game
-        instance with default values for attributes.
-        - BLUE: RGB color code for blue.
-        - RED: RGB color code for red.
-        - YELLOW: RGB color code for yellow.
-        - BG_COLOUR: RGB color code for the background.
-        - ROW_COUNT: Number of rows on the game board.
-        - COLUMN_COUNT: Number of columns on the game board.
-        - board: 2D list representing the game board.
-        - turn: Current player's turn (0 for player 1, 1 for player 2).
-        - game_over: Indicates if the game is over.
+        Args:
+            x (int): The x-coordinate of the button.
+            y (int): The y-coordinate of the button.
+            width (int): The width of the button.
+            height (int): The height of the button.
+            text (str): The text displayed on the button.
+            action (Optional[Callable[[], None]]): The
+            function to execute when the button is clicked.
+
+        The constructor initializes a Button instance with the provided
+        coordinates, dimensions, text, and an optional action function.
+        The color is set to BUTTON_COLOR, and the 'hovered' attribute is
+        initially set to False.
+
+        Returns:
+            None
+        """
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.action = action
+        self.color = BUTTON_COLOR
+        self.hovered = False
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """
+        Draw the button on the screen.
+
+        Args:
+        - screen (pygame.Surface): The game screen to draw the button on.
+        """
+        color = self.hovered and BUTTON_HOVER_COLOR or self.color
+        pygame.draw.rect(screen, color, self.rect)
+        font = pygame.font.Font(None, BUTTON_FONT_SIZE)
+        text = font.render(self.text, True, WHITE)
+        text_rect = text.get_rect(center=self.rect.center)
+        screen.blit(text, text_rect)
+
+
+# Create a MainMenu class
+class MainMenu:
+    """
+    A class to represent the main menu of the game.
+
+    Attributes:
+    - width (int): The width of the game window.
+    - height (int): The height of the game window.
+    """
+
+    def __init__(self, width: int, height: int) -> None:
+        """
+        Initialize an instance of YourClassName.
+
+        Parameters:
+            width (int): The width of the window.
+            height (int): The height of the window.
+
+        This constructor initializes the class instance with the specified
+        window dimensions and creates various buttons for a main menu.
+        """
+        self.title = (pygame.font.Font(None, TITLE_FONT_SIZE).render
+                      ("Connect 5", True, WHITE))
+        self.title_rect = self.title.get_rect(center=(width // 2, 100))
+        # dimentions and text for play button
+        self.play_button = Button(PLAY_BUTTON_X, PLAY_BUTTON_Y, BUTTON_WIDTH,
+                                  BUTTON_HEIGHT, "Play", self.play_game)
+        # dimentions and text for gimmicks button
+        self.gimmicks_button = (Button(GIMMICKS_BUTTON_X,
+                                       GIMMICKS_BUTTON_Y,
+                                       BUTTON_WIDTH,
+                                       BUTTON_HEIGHT,
+                                       "Gimmicks",
+                                       self.show_gimmicks))
+        # dimentions and text for exit button
+        self.exit_button = Button(EXIT_BUTTON_X,
+                                  EXIT_BUTTON_Y,
+                                  BUTTON_WIDTH,
+                                  BUTTON_HEIGHT,
+                                  "Exit",
+                                  self.exit_game)
+        self.buttons = ([self.play_button, self.
+                         gimmicks_button, self.exit_button])
+        self.width = width
+        self.height = height
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """
+        Draw the main menu on the screen.
+
+        Args:
+        - screen (pygame.Surface): The game screen to draw the main menu on.
+        """
+        screen.blit(self.title, self.title_rect)
+        for button in self.buttons:
+            button.draw(screen)
+
+    def play_game(self) -> None:
+        """Start the game when the "Play" button is clicked."""
+        game = connect5.Connect5Game()
+        game.run_game()
+
+    def show_gimmicks(self) -> None:
+        """
+        Display game gimmicks when clicked.
+
+        This method opens a new window to display game gimmicks text and waits
+        until the window is closed. The gimmicks_text list contains the lines
+        of text describing the game's gimmicks.
+
+        Gimmicks:
+        - This is Connect 5: That means it takes 5 checkers in a row to win
+        instead of the usual 4 in a row like a classic game of Connect 4.
+        - Hidden Turn Timer: There is a hidden turn timer of 20 seconds which
+        should add some suspense, excitement, and pressure for the players.
 
         Returns:
         None
         """
-        self.BLUE = (0, 0, 255)
-        self.RED = (255, 0, 0)
-        self.YELLOW = (255, 255, 0)
-        self.BG_COLOUR = (0, 0, 0)
-        self.ROW_COUNT = 7
-        self.COLUMN_COUNT = 8
-        self.board = self.create_board()
-        self.turn = 0
-        self.game_over = False
+        # This list is for the lines that show up
+        # when you click the "Gimmicks" button
+        gimmicks_text = [
+            "This is Connect 5:",
+            "That means it takes 5 checkers in a row to win instead",
+            "of the usual 4 in a row like a classic game of connect 4.",
+            "Hidden Turn Timer:",
+            "There is a hidden turn timer of 20 seconds which should",
+            "add some suspense, excitement, and pressure for the players."
+        ]
 
-    def create_board(self) -> List[List[int]]:
-        """
-        Create an empty game board for Connect 5.
-
-        Returns:
-        List[List[int]]: A 2D list representing the game
-        board where each element is initialized to 0.
-        """
-        board = [[0] * self.COLUMN_COUNT for _ in range(self.ROW_COUNT)]
-        return board
-
-    def drop_piece(self, row: int, col: int, piece: int) -> None:
-        """
-        Place a game piece on the game board.
-
-        Args:
-            row (int): The row where the piece will be placed.
-            col (int): The column where the piece will be placed.
-            piece (int): The piece to place on the game board.
-
-        This method updates the game board with the
-        specified piece at the given row and column.
-        """
-        self.board[row][col] = piece
-
-    def is_valid_location(self, col: int) -> bool:
-        """
-        Check if a given column is a valid location for placing a checker.
-
-        Args:
-            col (int): The column to check.
-
-        Returns:
-            bool: True if the column is a valid location
-            for placing a checker, False otherwise.
-        """
-        return self.board[self.ROW_COUNT - 1][col] == 0
-
-    def get_next_open_row(self, col: int) -> int:
-        """
-        Find the next open row in a given column.
-
-        Args:
-            col (int): The column to find the next open row in.
-
-        Returns:
-            int: The index of the next open row, or -1 if the column is full.
-        """
-        for row in range(self.ROW_COUNT):
-            # Checks if the row for the column is full
-            if self.board[row][col] == 0:
-                return row
-        return -1  # -1 if column is full
-
-    def print_board(self) -> None:
-        """
-        Print the game board.
-
-        This method prints the current state of the game board,
-        flipping it vertically (from top to bottom) for display.
-        It helps visualize the game board's current layout.
-        """
-        print(np.flip(self.board, 0))
-
-    def win_check(self, piece: int) -> bool:
-        """
-        Check for a winning move on the Connect 5 game board.
-
-        Args:
-            piece (int): The piece (player) to check for a win.
-
-        This method checks for a winning move in all possible
-        directions on the Connect 5 game board.
-        It returns True if a winning combination is found for
-        the specified piece; otherwise, it returns False.
-
-        Args:
-            piece (int): The player (piece) to check for a win
-            (0 for player 1, 1 for player 2).
-
-        Returns:
-            bool: True if a winning combination is found, False otherwise.
-        """
-        # Check for 5 verticle checkers in a row
-        for row in range(self.ROW_COUNT - 4):
-            for col in range(self.COLUMN_COUNT):
-                # If 5 checkers in a row win_check will become True
-                if all(self.board[row + i][col] == piece for i in range(5)):
-                    return True
-
-        # Check for 5 horizontal checkers in a row
-        for row in range(self.ROW_COUNT):
-            for col in range(self.COLUMN_COUNT - 4):
-                # If 5 checkers in a row win_check will become True
-                if all(self.board[row][col + i] == piece for i in range(5)):
-                    return True
-
-        # Checks for 5 negativly sloped diagonal checkers in a row
-        for row in range(4, self.ROW_COUNT):
-            for col in range(self.COLUMN_COUNT - 4):
-                # If 5 checkers in a row win_check will become True
-                if all(self.board[row - i][col + i]
-                       == piece for i in range(5)):
-                    return True
-
-        # Checks for 5 positively sloped diagonal checkers in a row
-        for row in range(self.ROW_COUNT - 4):
-            for col in range(self.COLUMN_COUNT - 4):
-                # If 5 checkers in a row win_check will become True
-                if all(self.board[row + i][col + i]
-                       == piece for i in range(5)):
-                    return True
-
-        return False
-
-    def draw_board(self) -> None:
-        """
-        Draw the Connect 5 game board on the screen.
-
-        This method visually represents the current
-        state of the game board on the game screen.
-        It draws the game grid and any player checkers that are on the board.
-
-        Returns:
-        None
-        """
-        # This part of code draws the blue grid that the checkers fall into
-        for col in range(self.COLUMN_COUNT):
-            for row in range(self.ROW_COUNT):
-                pygame.draw.rect(self.screen, self.BLUE,
-                                 (col * self.SQUARESIZE, row *
-                                  self.SQUARESIZE + self.SQUARESIZE,
-                                  self.SQUARESIZE, self.SQUARESIZE))
-                pygame.draw.circle(
-                    self.screen, self.BG_COLOUR,
-                    (int(col * self.SQUARESIZE + self.SQUARESIZE / 2),
-                        (row * self.SQUARESIZE + self.SQUARESIZE +
-                         self.SQUARESIZE / 2)),
-                    self.RADIUS
-                )
-
-        # This part of code draws the red or yellow checkers that the player places
-        for col in range(self.COLUMN_COUNT):
-            for row in range(self.ROW_COUNT):
-                if self.board[row][col] == 1:
-                    pygame.draw.circle(self.screen, self.RED, (int(col *
-                                       self.SQUARESIZE +
-                                       self.SQUARESIZE /
-                                       2), self.height -
-                                       int(row * self.SQUARESIZE +
-                                       self.SQUARESIZE /
-                                       2)), self.RADIUS)
-                elif self.board[row][col] == 2:
-                    pygame.draw.circle(self.screen, self.YELLOW, (int(col *
-                                       self.SQUARESIZE +
-                                       self.SQUARESIZE /
-                                       2), self.height -
-                                       int(row * self.SQUARESIZE +
-                                       self.SQUARESIZE /
-                                       2)), self.RADIUS)
-        pygame.display.update()
-
-    def run_game(self) -> None:
-        """
-        Run the Connect 5 game.
-
-        This method initializes the game, handles player
-        moves,checks for wins, and manages the game loop.
-
-        The game loop continues until one of the
-        players wins or the game is exited.
-
-        Returns:
-        None
-        """
-        pygame.init()
-
-        self.SQUARESIZE = 100
-
-        # Width and height of the board
-        self.width = self.COLUMN_COUNT * self.SQUARESIZE
-        self.height = (self.ROW_COUNT + 1) * self.SQUARESIZE
-
-        size = (self.width, self.height)
-
-        self.RADIUS = int(self.SQUARESIZE/2 - 5)
-
-        self.screen = pygame.display.set_mode(size)
-
-        self.draw_board()
-        pygame.display.update()
-
-        myfont = pygame.font.SysFont("monospace", 75)
-
-        clock = pygame.time.Clock()
-        current_time = 0
-        player_one_button_press_time = 0
-        player_two_button_press_time = 0
-        first_move = False
-        # Check if game is still running or not
-        while not self.game_over:
+        gimmicks_window = pygame.display.set_mode((GIMMICKS_WIDTH,
+                                                   GIMMICKS_HEIGHT))
+        pygame.display.set_caption("Gimmicks")
+        running = True
+        while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    running = False
+                    # Reset the window size to the original size
+                    pygame.display.set_mode((self.width, self.height))
+            gimmicks_window.fill(BLACK)
+            # Initial Y position for the first line of text
+            gimmicks_window_y = 100
+            font = pygame.font.Font(None, GIMMICKS_FONT_SIZE)
+            for line in gimmicks_text:
+                line_text = font.render(line, True, WHITE)
+                gimmicks_window.blit(line_text, (GIMMICKS_WINDOW_X,
+                                                 gimmicks_window_y))
+                # Adjust Y position for the next line
+                gimmicks_window_y += GIMMICKS_WINDOW_Y_ADJUST
 
-                if event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, self.BG_COLOUR,
-                                     (0, 0, self.width, self.SQUARESIZE))
-                    posx = event.pos[0]
-                    if self.turn == 0:
-                        pygame.draw.circle(self.screen, self.RED,
-                                           (posx, int(self.SQUARESIZE
-                                                      / 2)), self.RADIUS)
-                    else:
-                        pygame.draw.circle(self.screen, self.YELLOW,
-                                           (posx, int(self.SQUARESIZE
-                                                      / 2)), self.RADIUS)
-                    pygame.display.update()
+            pygame.display.flip()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    first_move = True
-                    pygame.draw.rect(self.screen, self.BG_COLOUR,
-                                     (0, 0, self.width, self.SQUARESIZE))
-                    # Player one's turn
-                    if self.turn == 0:
-                        posx = event.pos[0]
-                        col = int(math.floor(posx/self.SQUARESIZE))
+    def exit_game(self) -> None:
+        """
+        Exit the game when the "Exit" button is clicked.
 
-                        if self.is_valid_location(col):
-                            self.turn += 1
-                            self.turn = self.turn % 2
-                            row = self.get_next_open_row(col)
-                            self.drop_piece(row, col, 1)
+        This method gracefully shuts down the game and exits the application.
 
-                            if self.win_check(1):
-                                label = myfont.render("Player 1 wins!!",
-                                                      1, self.RED)
-                                self.screen.blit(label, (40, 10))
-                                self.game_over = True
-
-                    # Player two's turn
-                    else:
-                        posx = event.pos[0]
-                        col = int(math.floor(posx/self.SQUARESIZE))
-                        if self.is_valid_location(col):
-                            self.turn += 1
-                            self.turn = self.turn % 2
-                            row = self.get_next_open_row(col)
-                            self.drop_piece(row, col, 2)
-
-                            if self.win_check(2):
-                                label = myfont.render("Player 2 wins!!",
-                                                      1, self.YELLOW)
-                                self.screen.blit(label, (40, 10))
-                                self.game_over = True
-
-                    self.print_board()
-                    self.draw_board()
-
-                    # Auto closes game after 5 seconds after a win
-                    if self.game_over:
-                        pygame.time.wait(5000)
-
-            # Code for hidden turn timer
-            current_time = pygame.time.get_ticks()
-            # Checks if it is first move to start timer
-            if first_move:
-                match self.turn:
-                    case 0:
-                        player_one_button_press_time = pygame.time.get_ticks()
-                    case 1:
-                        player_two_button_press_time = pygame.time.get_ticks()
-            else:
-                player_one_button_press_time = pygame.time.get_ticks()
-                player_two_button_press_time = pygame.time.get_ticks()
-            # Checks if player 1's timer reaches 20 seconds
-            if current_time - player_one_button_press_time > 20000:
-                print("1")
-                self.turn = 0
-                player_two_button_press_time = pygame.time.get_ticks()
-                player_one_button_press_time = 0
-            # Checks if player 2's timer reaches 20 seconds
-            if current_time - player_two_button_press_time > 20000:
-                print("2")
-                self.turn = 1
-                player_one_button_press_time = pygame.time.get_ticks()
-                player_two_button_press_time = 0
-
-            clock.tick(60)
+        Returns:
+        None
+        """
+        pygame.quit()
+        sys.exit()
 
 
-if __name__ == "__main__":
-    game = Connect5Game()
-    game.run_game()
+# Create the MainMenu object with the original window size
+main_menu = MainMenu(ORIGINAL_WIDTH, ORIGINAL_HEIGHT)
+
+# Create the game window
+screen = pygame.display.set_mode((main_menu.width, main_menu.height))
+pygame.display.set_caption(WINDOW_TITLE)
+
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEMOTION:
+            for button in main_menu.buttons:
+                if button.rect.collidepoint(event.pos):
+                    button.hovered = True
+                else:
+                    button.hovered = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == LMB:
+                for button in main_menu.buttons:
+                    if button.rect.collidepoint(event.pos):
+                        if button.action:
+                            button.action()
+    screen.fill(BLACK)
+    main_menu.draw(screen)
+    pygame.display.flip()
+
+# Quit the game
+pygame.quit()
+sys.exit()
