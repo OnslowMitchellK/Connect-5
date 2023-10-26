@@ -2,7 +2,7 @@
 
 import pygame
 import sys
-import testing
+import connect5
 from typing import Optional, Callable
 
 # Initialize Pygame
@@ -119,7 +119,7 @@ class MainMenu:
 
     def play_game(self) -> None:
         """Start the game when the "Play" button is clicked."""
-        game = testing.Connect5Game()
+        game = connect5.Connect5Game()
         game.run_game()
 
     def show_gimmicks(self) -> None:
